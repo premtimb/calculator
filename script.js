@@ -41,10 +41,19 @@ let clear = document.querySelector('.clear');
 let backspace = document.querySelector('.backspace');
 
 function updateDisplay(value){
-    if(value === '' || value === null){
-        display.textContent = '0';
-    }else {
-        display.textContent = value;
+    if(value === '' || value === null || value === undefined){
+        value = '0';
+    }
+
+    const str = value.toString();
+    display.textContent = str;
+
+    if (str.length <= 8) {
+        display.style.fontSize = '3rem';      
+    } else if (str.length <= 12) {
+        display.style.fontSize = '2.4rem';   
+    } else {
+        display.style.fontSize = '1.8rem';  
     }
 }
 updateDisplay('0');
@@ -61,6 +70,18 @@ buttons.forEach(button => {
         }
     });
 });
+
+function formatNumber(num){ 
+    if(!isFinite(num)) return 'ERROR';
+
+    const rounded = Math.round(num * 1e10) / 1e10;
+    let str = rounded.toString();
+
+    if(str.length > 12){
+        str = rounded.toExponential(6);
+    }
+    return str;
+}
 
 function handleDigit(digit){
     if(operator === ''){
@@ -85,8 +106,13 @@ function handleDigit(digit){
 function handleOperator(op){
     if(firstNum === '') return;
 
+    if(operator !== '' && secondNum === ''){
+        operator = op;
+        return ;
+    }
     if(secondNum !== ''){
-        const result = operate(operator,Number(firstNum),Number(secondNum))
+        const rawResult= operate(operator,Number(firstNum),Number(secondNum))
+        const result = formatNumber(rawResult);
         firstNum = String(result);
         secondNum = '';
         updateDisplay(firstNum);
@@ -96,7 +122,15 @@ function handleOperator(op){
 
 function handleEquals(){
     if(firstNum === '' || operator === '' || secondNum === '') return;
-    const result = operate(operator, Number(firstNum), Number(secondNum));
+    if(operator === '/' && Number(secondNum) === 0){
+        updateDisplay('ERROR');
+        firstNum ='';
+        operator ='';
+        secondNum='';
+        return;
+    }
+    const rawResult = operate(operator, Number(firstNum), Number(secondNum));
+    const result = formatNumber(rawResult);
     updateDisplay(result);
 
     firstNum = String(result);
