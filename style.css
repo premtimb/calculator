@@ -25,6 +25,7 @@
         justify-content: flex-end;
         border-radius: 10px;
         min-height: 60px;
+        transition: font-size 0.1s ease;
     }
 
     .undo{
